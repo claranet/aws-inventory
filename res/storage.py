@@ -106,21 +106,21 @@ def get_s3_inventory(oId, profile, boto3_config, selected_regions):
             bucket['location'] = s3.get_bucket_location(Bucket = bucket_name).get('LocationConstraint')
 
             # Summarize nb of objets and total size (for the current bucket)
-            paginator = s3.get_paginator('list_objects_v2')
-            nbobj = 0
-            size = 0
-            #page_objects = paginator.paginate(Bucket=bucketname,PaginationConfig={'MaxItems': 10})
-            page_objects = paginator.paginate(Bucket = bucket_name)
-            for objects in page_objects:
-                try:
-                    nbobj += len(objects['Contents'])
-                    for obj in objects['Contents']:
-                        size += obj['Size']
-                except:
-                    pass
-            bucket['number_of_objects'] = nbobj
-            bucket['total_size'] = size
-
+#            paginator = s3.get_paginator('list_objects_v2')
+#            nbobj = 0
+#            size = 0
+#            #page_objects = paginator.paginate(Bucket=bucketname,PaginationConfig={'MaxItems': 10})
+#            page_objects = paginator.paginate(Bucket = bucket_name)
+#            for objects in page_objects:
+#                try:
+#                    nbobj += len(objects['Contents'])
+#                    for obj in objects['Contents']:
+#                        size += obj['Size']
+#                except:
+#                    pass
+#            bucket['number_of_objects'] = nbobj
+#            bucket['total_size'] = size
+#
             inventory.append(bucket)
 
     return inventory
