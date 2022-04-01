@@ -355,14 +355,14 @@ def get_elasticbeanstalk_applications_inventory(oId, profile, boto3_config, sele
 def get_autoscaling_inventory(oId, profile, boto3_config, selected_regions):
 
     """
-        Returns eks inventory (if the region is avalaible)
+        Returns autoscaling inventory (with launch configs and plans)
 
         :param oId: ownerId (AWS account)
         :type oId: string
         :param profile: configuration profile name used for session
         :type profile: string
 
-        :return: eks inventory
+        :return: asg inventory
         :rtype: json
 
         .. note:: https://boto3.readthedocs.io/en/latest/reference/services/autoscaling.html
@@ -370,17 +370,7 @@ def get_autoscaling_inventory(oId, profile, boto3_config, selected_regions):
 
     autoscaling_inventory = {}
 
-    autoscaling_inventory['autoscaling-groups'] = glob.get_inventory(
-        ownerId = oId,
-        profile = profile,
-        boto3_config = boto3_config,
-        selected_regions = selected_regions,
-        aws_service = "autoscaling", 
-        aws_region = "all", 
-        function_name = "describe_auto_scaling_groups", 
-        key_get = "AutoScalingGroups",
-        pagination = True
-    )
+    autoscaling_inventory['autoscaling-groups'] = get_autoscaling_inventory_groups(oId, profile, boto3_config, selected_regions)
 
     autoscaling_inventory['autoscaling-launch-configuration'] = glob.get_inventory(
         ownerId = oId,
@@ -406,6 +396,35 @@ def get_autoscaling_inventory(oId, profile, boto3_config, selected_regions):
     )
 
     return autoscaling_inventory
+
+
+def get_autoscaling_inventory_groups(oId, profile, boto3_config, selected_regions):
+
+    """
+        Returns autoscaling inventory (only groups)
+
+        :param oId: ownerId (AWS account)
+        :type oId: string
+        :param profile: configuration profile name used for session
+        :type profile: string
+
+        :return: asg inventory
+        :rtype: json
+
+        .. note:: https://boto3.readthedocs.io/en/latest/reference/services/autoscaling.html
+    """
+
+    return glob.get_inventory(
+        ownerId = oId,
+        profile = profile,
+        boto3_config = boto3_config,
+        selected_regions = selected_regions,
+        aws_service = "autoscaling", 
+        aws_region = "all", 
+        function_name = "describe_auto_scaling_groups", 
+        key_get = "AutoScalingGroups",
+        pagination = True
+    )
 
 
 #  ------------------------------------------------------------------------

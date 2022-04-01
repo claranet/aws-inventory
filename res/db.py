@@ -169,17 +169,7 @@ def get_elasticache_inventory(oId, profile, boto3_config, selected_regions):
 
     elasticache_inventory = {}
 
-    elasticache_inventory['cache-clusters'] = glob.get_inventory(
-        ownerId = oId,
-        profile = profile,
-        boto3_config = boto3_config,
-        selected_regions = selected_regions,
-        aws_service = "elasticache", 
-        aws_region = "all", 
-        function_name = "describe_cache_clusters", 
-        key_get = "CacheClusters",
-        pagination = True
-    )
+    elasticache_inventory['cache-clusters'] = get_elasticache_inventory_clusters(oId, profile, boto3_config, selected_regions)
 
     elasticache_inventory['reserved-cache-nodes'] = glob.get_inventory(
         ownerId = oId,
@@ -190,6 +180,38 @@ def get_elasticache_inventory(oId, profile, boto3_config, selected_regions):
         aws_region = "all", 
         function_name = "describe_reserved_cache_nodes", 
         key_get = "ReservedCacheNodes",
+        pagination = True
+    )
+
+    return elasticache_inventory
+
+
+def get_elasticache_inventory_clusters(oId, profile, boto3_config, selected_regions):
+
+    """
+        Returns elasticache inventory (clusters only).
+
+        :param oId: ownerId (AWS account)
+        :type oId: string
+        :param profile: configuration profile name used for session
+        :type profile: string
+
+        :return: elasticache inventory
+        :rtype: json
+
+        ..note:: http://boto3.readthedocs.io/en/latest/reference/services/elasticache.html
+
+    """
+
+    return glob.get_inventory(
+        ownerId = oId,
+        profile = profile,
+        boto3_config = boto3_config,
+        selected_regions = selected_regions,
+        aws_service = "elasticache", 
+        aws_region = "all", 
+        function_name = "describe_cache_clusters", 
+        key_get = "CacheClusters",
         pagination = True
     )
 
