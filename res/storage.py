@@ -77,21 +77,21 @@ def get_s3_inventory(oId, profile, boto3_config, selected_regions):
                 pass
 
             # ACL
-            try:
-                acl = s3.get_bucket_acl(Bucket = bucket_name)
-                del acl['ResponseMetadata']
-                bucket['acl'] = acl              
-            except:
-                pass
+            # try:
+            #     acl = s3.get_bucket_acl(Bucket = bucket_name)
+            #     del acl['ResponseMetadata']
+            #     bucket['acl'] = acl              
+            # except:
+            #     pass
             
             # Policy
-            try:
-                policy = "no"
-                policy = json.JSONDecoder().decode(s3.get_bucket_policy(Bucket = bucket_name).get('Policy'))
-                del policy['ResponseMetadata']
-            except:
-                pass
-            bucket['policy'] = policy
+            # try:
+            #     policy = "no"
+            #     policy = json.JSONDecoder().decode(s3.get_bucket_policy(Bucket = bucket_name).get('Policy'))
+            #     del policy['ResponseMetadata']
+            # except:
+            #     pass
+            # bucket['policy'] = policy
 
             # Encryption
             try:
