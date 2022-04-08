@@ -76,12 +76,12 @@ def get_inventory(ownerId,
 
     inventory = []
     config.logger.info('Account {}, {} inventory ({})'.format(ownerId, aws_service, aws_region))
-
+    session = utils.create_session(ownerId, profile)
     if (aws_region == 'all'):
 
         # inventory must be processed region by region, if available
 
-        session = boto3.Session(profile_name=profile)
+        # session = boto3.Session(profile_name=profile)
         svc_list = session.get_available_regions(aws_service)
 
         # Bug AWS: get_available_regions("timestream-write") returns an empty array, though it's not a global service :(
@@ -169,7 +169,7 @@ def get_inventory(ownerId,
             utils.progress(aws_region)
             utils.display(ownerId, aws_region, aws_service, function_name)
 
-            session = boto3.Session(profile_name=profile)
+            # session = boto3.Session(profile_name=profile)
             client = session.client(aws_service, config=boto3_config)
 
             if (pagination):
