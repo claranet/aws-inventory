@@ -59,19 +59,19 @@ def get_s3_inventory(oId, profile, boto3_config, selected_regions):
 
             bucket_name = bucket['Name']
 
-            # Check if a website if configured; if yes, it could lead to a DLP issue
-            try:
-                has_website = 'unknown'
-                has_website = s3.get_bucket_website(Bucket = bucket_name)
-                del has_website['ResponseMetadata']
-            except ClientError as ce:
-                if 'NoSuchWebsiteConfiguration' in ce.args[0]:
-                    has_website = 'no'
-            bucket['website'] = has_website
+            ## Check if a website if configured; if yes, it could lead to a DLP issue
+            #try:
+            #    has_website = 'unknown'
+            #    has_website = s3.get_bucket_website(Bucket = bucket_name)
+            #    del has_website['ResponseMetadata']
+            #except ClientError as ce:
+            #    if 'NoSuchWebsiteConfiguration' in ce.args[0]:
+            #        has_website = 'no'
+            #bucket['Website'] = has_website
 
             # Tags
             try:
-                bucket['tags'] = s3.get_bucket_tagging(Bucket = bucket_name).get('TagSet')
+                bucket['Tags'] = s3.get_bucket_tagging(Bucket = bucket_name).get('TagSet')
             except:
                 pass
 
@@ -93,16 +93,16 @@ def get_s3_inventory(oId, profile, boto3_config, selected_regions):
             # bucket['policy'] = policy
 
             # Encryption
-            try:
-                encrypt = "no"
-                encrypt = s3.get_bucket_encryption(Bucket = bucket_name)
-                del encrypt['ResponseMetadata']
-            except:
-                pass
-            bucket['encryption'] = encrypt  
+            # try:
+            #     encrypt = "no"
+            #     encrypt = s3.get_bucket_encryption(Bucket = bucket_name)
+            #     del encrypt['ResponseMetadata']
+            # except:
+            #     pass
+            # bucket['Encryption'] = encrypt  
 
             # Other
-            bucket['location'] = s3.get_bucket_location(Bucket = bucket_name).get('LocationConstraint')
+            bucket['Location'] = s3.get_bucket_location(Bucket = bucket_name).get('LocationConstraint')
 
             # Summarize nb of objets and total size (for the current bucket)
 #            paginator = s3.get_paginator('list_objects_v2')
