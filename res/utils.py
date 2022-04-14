@@ -11,10 +11,6 @@ import dateutil
 from dateutil.tz import tzutc
 import config
 import argparse
-from botocore import credentials
-import botocore.session
-import boto3
-import os
 
 #
 #  Useful functions
@@ -252,42 +248,6 @@ def json_datetime_converter(json_text):
 
     return json.dumps(json_text, default = datetime_converter)      
 
-def create_session(account_id, role):
-    """Create boto session using the IAM Role or the profile name
-
-    Args:
-        account_id (str): the AWS account id
-        role (str): The IAM role name or the profile name
-
-    Returns:
-        botocore.session: boto3 session
-    """
-    try:
-        session = boto3.Session(profile_name=role) 
-        return session
-    except botocore.exceptions.ProfileNotFound as ex:
-        # By default the cache path is ~/.aws/boto/cache
-        cli_cache = os.path.join(os.path.expanduser('~'),'.cache')
-
-        # Construct botocore session with cache
-        default_session = botocore.session.get_session()
-        default_session.get_component('credential_provider').get_provider('assume-role').cache = credentials.JSONFileCache(cli_cache)
-
-        # Create boto3 client from session
-        sts_client = boto3.Session(botocore_session=default_session).client('sts')
-
-        # Create session
-        assumed_role_object=sts_client.assume_role(
-        RoleArn=f"arn:aws:iam::{account_id}:role/{role}",
-        RoleSessionName=f"AssumeRoleSession{account_id}",
-        )
-        credentials_array = (assumed_role_object["Credentials"]["AccessKeyId"], assumed_role_object["Credentials"]["SecretAccessKey"], assumed_role_object["Credentials"]["SessionToken"])
-        
-        return boto3.Session(botocore_session=default_session,
-            aws_access_key_id=credentials_array[0],
-            aws_secret_access_key=credentials_array[1],
-            aws_session_token=credentials_array[2]
-        )
 #
 # Hey, doc: we're in a module!
 #

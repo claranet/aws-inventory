@@ -76,7 +76,12 @@ def get_inventory(ownerId,
 
     inventory = []
     config.logger.info('Account {}, {} inventory ({})'.format(ownerId, aws_service, aws_region))
-    session = utils.create_session(ownerId, profile)
+    if hasattr(config, 'sessions') and ownerId in config.sessions.keys():
+        session = config.sessions[ownerId]
+        config.logger.debug('Use provided Boto3 {} for account {}'.format(session, ownerId))
+    else: 
+        session = boto3.Session(profile_name=profile)
+        config.logger.debug('Create new Boto3 session for account {} and profile {}'.format(ownerId, profile))
     if (aws_region == 'all'):
 
         # inventory must be processed region by region, if available
