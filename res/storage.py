@@ -50,7 +50,7 @@ def get_s3_inventory(oId, profile, boto3_config, selected_regions):
     )
 
     # S3 needs some analysis (website, size)
-    session = config.sessions[oId] if hasattr(config, 'sessions') and oId in config.sessions.keys() else boto3.Session(profile_name=profile)
+    session = utils.get_boto_session(oId, profile)
     s3 = session.client("s3")
     
     if len(bucket_list) > 0:

@@ -11,6 +11,7 @@ import dateutil
 from dateutil.tz import tzutc
 import config
 import argparse
+import config
 
 #
 #  Useful functions
@@ -253,3 +254,13 @@ def json_datetime_converter(json_text):
 #
 if (__name__ == '__main__'):
     print('Module => Do not execute')
+    
+
+def get_boto_session(account_id, profile):
+    if hasattr(config, 'sessions') and account_id in config.sessions.keys():
+        session = config.sessions[account_id]
+        config.logger.info('Use provided Boto3 {} for account {}'.format(session, account_id))
+    else: 
+        session = boto3.Session(profile_name=profile)
+        config.logger.info('Create new Boto3 session for account {} and profile {}'.format(account_id, profile))
+    return session
