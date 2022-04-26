@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "aws-inventory"
+version = "0.1.0"
+description = "Python script for AWS resources inventory (cheaper than AWS Config)"
+authors = ["Janiko <janiko@geba.fr>"]
+license = "GPL-3.0"
+packages = [{ include = "res" }]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<4.0"
+boto3 = ">=1.17.104"
+
+[tool.poetry.dev-dependencies]
+wheel = ">=0.36.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
