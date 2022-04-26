@@ -259,6 +259,7 @@ def get_boto_session(account_id, profile):
         config.logger.debug('Create new Boto3 session for account {} and profile {}'.format(account_id, profile))
     return session
 
+
 #
 # Hey, doc: we're in a module!
 #
