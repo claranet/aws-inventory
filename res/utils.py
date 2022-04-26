@@ -249,12 +249,6 @@ def json_datetime_converter(json_text):
 
     return json.dumps(json_text, default = datetime_converter)      
 
-#
-# Hey, doc: we're in a module!
-#
-if (__name__ == '__main__'):
-    print('Module => Do not execute')
-    
 
 def get_boto_session(account_id, profile):
     if hasattr(config, 'sessions') and account_id in config.sessions.keys():
@@ -264,3 +258,9 @@ def get_boto_session(account_id, profile):
         session = boto3.Session(profile_name=profile)
         config.logger.debug('Create new Boto3 session for account {} and profile {}'.format(account_id, profile))
     return session
+
+#
+# Hey, doc: we're in a module!
+#
+if (__name__ == '__main__'):
+    print('Module => Do not execute')
