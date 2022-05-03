@@ -102,7 +102,7 @@ def get_s3_inventory(oId, profile, boto3_config, selected_regions):
             # bucket['Encryption'] = encrypt  
 
             # Other
-            bucket['Location'] = s3.get_bucket_location(Bucket = bucket_name).get('LocationConstraint')
+            # bucket['Location'] = s3.get_bucket_location(Bucket = bucket_name).get('LocationConstraint')
 
             # Summarize nb of objets and total size (for the current bucket)
 #            paginator = s3.get_paginator('list_objects_v2')
