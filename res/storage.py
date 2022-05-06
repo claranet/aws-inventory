@@ -104,12 +104,12 @@ def get_s3_inventory(oId, profile, boto3_config, selected_regions):
             # bucket['Encryption'] = encrypt  
 
             # Other
-            try:
-                bucket['Location'] = s3.get_bucket_location(Bucket = bucket_name).get('LocationConstraint')
-            except ClientError as e:
-                if e.response['Error']['Code'] == 'AccessDenied':
-                    config.logger.warning("S3 AccessDenied for get_bucket_location on {} for {}".format(bucket_name, ownerId))
-                    pass
+            # try:
+            #     bucket['Location'] = s3.get_bucket_location(Bucket = bucket_name).get('LocationConstraint')
+            # except ClientError as e:
+            #     if e.response['Error']['Code'] == 'AccessDenied':
+            #         config.logger.warning("S3 AccessDenied for get_bucket_location on {} for {}".format(bucket_name, ownerId))
+            #         pass
 
 
             # Summarize nb of objets and total size (for the current bucket)
