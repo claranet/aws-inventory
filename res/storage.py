@@ -74,7 +74,7 @@ def get_s3_inventory(oId, profile, boto3_config, selected_regions):
                 bucket['Tags'] = s3.get_bucket_tagging(Bucket = bucket_name).get('TagSet')
             except ClientError as e:
                 if e.response['Error']['Code'] == 'AccessDenied':
-                    config.logger.warning("S3 AccessDenied for get_bucket_tagging on {} for {}".format(bucket_name, ownerId))
+                    config.logger.warning("S3 AccessDenied for get_bucket_tagging on {} for {}".format(bucket_name, oId))
                     pass
 
             # ACL
@@ -108,7 +108,7 @@ def get_s3_inventory(oId, profile, boto3_config, selected_regions):
             #     bucket['Location'] = s3.get_bucket_location(Bucket = bucket_name).get('LocationConstraint')
             # except ClientError as e:
             #     if e.response['Error']['Code'] == 'AccessDenied':
-            #         config.logger.warning("S3 AccessDenied for get_bucket_location on {} for {}".format(bucket_name, ownerId))
+            #         config.logger.warning("S3 AccessDenied for get_bucket_location on {} for {}".format(bucket_name, oId))
             #         pass
 
 
