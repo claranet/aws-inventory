@@ -72,8 +72,10 @@ def get_s3_inventory(oId, profile, boto3_config, selected_regions):
             # Tags
             try:
                 bucket['Tags'] = s3.get_bucket_tagging(Bucket = bucket_name).get('TagSet')
-            except:
-                pass
+            except ClientError as e:
+                if e.response['Error']['Code'] == 'AccessDenied':
+                    config.logger.warning("S3 AccessDenied for get_bucket_tagging on {} for {}".format(bucket_name, ownerId))
+                    pass
 
             # ACL
             # try:
@@ -102,7 +104,13 @@ def get_s3_inventory(oId, profile, boto3_config, selected_regions):
             # bucket['Encryption'] = encrypt  
 
             # Other
-            bucket['Location'] = s3.get_bucket_location(Bucket = bucket_name).get('LocationConstraint')
+            # try:
+            #     bucket['Location'] = s3.get_bucket_location(Bucket = bucket_name).get('LocationConstraint')
+            # except ClientError as e:
+            #     if e.response['Error']['Code'] == 'AccessDenied':
+            #         config.logger.warning("S3 AccessDenied for get_bucket_location on {} for {}".format(bucket_name, ownerId))
+            #         pass
+
 
             # Summarize nb of objets and total size (for the current bucket)
 #            paginator = s3.get_paginator('list_objects_v2')
