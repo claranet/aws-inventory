@@ -35,13 +35,16 @@ def get_sqs_inventory(oId, profile, boto3_config, selected_regions):
 
         ..note:: http://boto3.readthedocs.io/en/latest/reference/services/sqs.html
     """ 
-    
-    return glob.get_inventory(
+
+    inventory = []
+    service = "sqs"
+
+    queue_list = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
         selected_regions = selected_regions,
-        aws_service = "sqs", 
+        aws_service = service, 
         aws_region = "all", 
         function_name = "list_queues", 
         key_get = "QueueUrls",
@@ -52,6 +55,22 @@ def get_sqs_inventory(oId, profile, boto3_config, selected_regions):
         detail_additional_parameters = {"AttributeNames": ["All"]}
     )
 
+
+    if len(queue_list) > 0:
+
+        queues_by_region = utils.resources_by_region(queue_list)
+
+        for region, queues in queues_by_region.items():
+
+            session = utils.get_boto_session(oId, profile)
+            sqs = session.client(service, region_name=region)
+
+        for queue in queues:
+
+            queue["Tags"] = sqs.list_queue_tags(QueueUrl=queue["QueueUrl"]).get("Tags")
+            inventory.append(queue)
+
+    return inventory
 
 #  ------------------------------------------------------------------------
 #
