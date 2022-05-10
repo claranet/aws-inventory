@@ -281,12 +281,7 @@ def get_elbv2_inventory(oId, profile, boto3_config, selected_regions):
 def _retrieve_lb_tags(oId, profile, service, lb_list):
     if len(lb_list) > 0:
         
-        lbs_by_region = {}
-
-        for lb in lb_list:
-            if lb['RegionName'] not in lbs_by_region:
-                lbs_by_region[lb['RegionName']] = []
-            lbs_by_region[lb['RegionName']].append(lb)
+        lbs_by_region = utils.resources_by_region(lb_list)
 
         for region, lbs in lbs_by_region.items():
 

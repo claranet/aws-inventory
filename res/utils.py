@@ -260,6 +260,16 @@ def get_boto_session(account_id, profile):
     return session
 
 
+def resources_by_region(resources):
+    resources_by_region = {}
+    for resource in resources:
+        resource_region = resource['RegionName']
+        if resource_region not in resources_by_region:
+            resources_by_region[resource_region] = []
+        resources_by_region[resource_region].append(resource)
+    return resources_by_region
+
+
 #
 # Hey, doc: we're in a module!
 #
