@@ -215,17 +215,22 @@ def get_elb_inventory(oId, profile, boto3_config, selected_regions):
 
     """
 
-    return glob.get_inventory(
+    service = "elb"
+    lb_list = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
         selected_regions = selected_regions,
-        aws_service = "elb",
+        aws_service = service,
         aws_region = "all",
         function_name = "describe_load_balancers",
         key_get = "LoadBalancerDescriptions",
         pagination = True
     )
+
+    return _retrieve_lb_tags(oId, profile, service, lb_list)
+
+
 
 #  ------------------------------------------------------------------------
 #
@@ -249,19 +254,56 @@ def get_elbv2_inventory(oId, profile, boto3_config, selected_regions):
         ..note:: http://boto3.readthedocs.io/en/latest/reference/services/elbv2.html
 
     """
-    
-    return glob.get_inventory(
+    service = "elbv2"
+    lb_list = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
         selected_regions = selected_regions,
-        aws_service = "elbv2", 
+        aws_service = service, 
         aws_region = "all", 
         function_name = "describe_load_balancers", 
         key_get = "LoadBalancers",
         pagination = True
     )
 
+    return _retrieve_lb_tags(oId, profile, service, lb_list)
+
+
+def _retrieve_lb_tags(oId, profile, service, lb_list):
+    if len(lb_list) > 0:
+        
+        lbs_by_region = {}
+
+        for lb in lb_list:
+            if lb['RegionName'] not in lbs_by_region:
+                lbs_by_region[lb['RegionName']] = []
+            lbs_by_region[lb['RegionName']].append(lb)
+
+        for region, lbs in lbs_by_region.items():
+
+            session = utils.get_boto_session(oId, profile)
+            lb_client = session.client(service, region_name=region)
+            if service == "elb":
+                join_key = "LoadBalancerName"
+                tag_key = join_key
+                resp = lb_client.describe_tags(LoadBalancerNames=[lb[join_key] for lb in lbs])
+            elif service == "elbv2":
+                join_key = "LoadBalancerArn"
+                tag_key = "ResourceArn"
+                resp = lb_client.describe_tags(ResourceArns=[lb[join_key] for lb in lbs])
+            else:
+                break
+
+            region_tags = resp.get('TagDescriptions')
+            for lb_tags in region_tags:
+                for lb in lbs:
+                    if lb[join_key] == lb_tags[tag_key]:
+                        lb["Tags"] = lb_tags.get("Tags")
+            
+            lb_list.extend(lbs)
+
+    return lb_list
 #
 # Hey, doc: we're in a module!
 #
