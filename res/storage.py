@@ -190,18 +190,37 @@ def get_glacier_inventory(oId, profile, boto3_config, selected_regions):
         ..note:: http://boto3.readthedocs.io/en/latest/reference/services/glacier.html
 
     """
-    
-    return glob.get_inventory(
+    inventory = []
+    service = "glacier"
+
+    vault_list = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
         selected_regions = selected_regions,
-        aws_service = "glacier", 
+        aws_service = service, 
         aws_region = "all", 
         function_name = "list_vaults", 
         key_get = "VaultList",
         pagination = True
     )
+
+
+    if len(vault_list) > 0:
+
+        vaults_by_region = utils.resources_by_region(vault_list)
+
+        for region, vaults in vaults_by_region.items():
+
+            session = utils.get_boto_session(oId, profile)
+            glacier = session.client(service, region_name=region)
+
+        for vault in vaults:
+
+            vault["Tags"] = glacier.list_tags_for_vault(vaultName=vault["VaultName"]).get("Tags")
+            inventory.append(vault)
+
+    return inventory
 
 
 #  ------------------------------------------------------------------------
