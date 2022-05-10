@@ -108,7 +108,7 @@ def get_cloudfront_inventory(oId, profile, boto3_config, selected_regions):
 
     """
     
-    return glob.get_inventory(
+    inventory = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
@@ -117,9 +117,17 @@ def get_cloudfront_inventory(oId, profile, boto3_config, selected_regions):
         aws_region = "global", 
         function_name = "list_distributions", 
         key_get = "Items",
-        #key_get = "DistributionList",
+        detail_function = "list_tags_for_resource",
+        join_key = "ARN", 
+        detail_join_key = "Resource", 
+        detail_get_key = "Tags",
         pagination = True
     )
+
+    for resource in inventory:
+        resource["Tags"] = resource["Tags"]["Items"]
+    
+    return inventory
 
 
 #  ------------------------------------------------------------------------
