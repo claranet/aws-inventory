@@ -107,26 +107,32 @@ def get_cloudfront_inventory(oId, profile, boto3_config, selected_regions):
         ..note:: http://boto3.readthedocs.io/en/latest/reference/services/cloudfront.html
 
     """
-    
-    inventory = glob.get_inventory(
+    inventory = []
+    service = "cloudfront"
+
+    distribution_list = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
         selected_regions = selected_regions,
-        aws_service = "cloudfront", 
+        aws_service = service, 
         aws_region = "global", 
         function_name = "list_distributions", 
         key_get = "Items",
-        detail_function = "list_tags_for_resource",
-        join_key = "ARN", 
-        detail_join_key = "Resource", 
-        detail_get_key = "Tags",
+        #key_get = "DistributionList",
         pagination = True
     )
 
-    for resource in inventory:
-        resource["Tags"] = resource["Tags"]["Items"]
-    
+    if len(distribution_list) > 0:
+
+        session = utils.get_boto_session(oId, profile)
+        cloudfront = session.client(service)
+
+        for distribution in distribution_list:
+
+            distribution["Tags"] = cloudfront.list_tags_for_resource(Resource=distribution["ARN"]).get("Tags").get("Items")
+            inventory.append(distribution)
+
     return inventory
 
 
