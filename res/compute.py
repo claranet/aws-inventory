@@ -448,18 +448,36 @@ def get_lambda_inventory(oId, profile, boto3_config, selected_regions):
 
         .. note:: http://boto3.readthedocs.io/en/latest/reference/services/lambda.html
     """
+    inventory = []
+    service = "lambda"
 
-    return glob.get_inventory(
+    function_list = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
         selected_regions = selected_regions,
-        aws_service = "lambda", 
+        aws_service = service, 
         aws_region = "all", 
         function_name = "list_functions", 
         key_get = "Functions",
         pagination = True
     )
+
+    if len(function_list) > 0:
+
+        functions_by_region = utils.resources_by_region(function_list)
+
+        for region, functions in functions_by_region.items():
+
+            session = utils.get_boto_session(oId, profile)
+            client = session.client(service, region_name=region)
+
+        for function in functions:
+
+            function["Tags"] = client.list_tags(Resource=function["FunctionArn"]).get("Tags")
+            inventory.append(function)
+
+    return inventory
 
 
 #  ------------------------------------------------------------------------
