@@ -260,6 +260,22 @@ def get_boto_session(account_id, profile):
     return session
 
 
+def resources_by_region(resources):
+    """Create a dict where each key is a region and its value a list of resources."""
+    resources_by_region = {}
+    for resource in resources:
+        resource_region = resource['RegionName']
+        if resource_region not in resources_by_region:
+            resources_by_region[resource_region] = []
+        resources_by_region[resource_region].append(resource)
+    return resources_by_region
+
+
+def chunks_list(lst, size):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), size):
+        yield lst[i:i + size]
+
 #
 # Hey, doc: we're in a module!
 #

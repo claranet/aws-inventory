@@ -107,19 +107,33 @@ def get_cloudfront_inventory(oId, profile, boto3_config, selected_regions):
         ..note:: http://boto3.readthedocs.io/en/latest/reference/services/cloudfront.html
 
     """
-    
-    return glob.get_inventory(
+    inventory = []
+    service = "cloudfront"
+
+    distribution_list = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
         selected_regions = selected_regions,
-        aws_service = "cloudfront", 
+        aws_service = service, 
         aws_region = "global", 
         function_name = "list_distributions", 
         key_get = "Items",
         #key_get = "DistributionList",
         pagination = True
     )
+
+    if len(distribution_list) > 0:
+
+        session = utils.get_boto_session(oId, profile)
+        cloudfront = session.client(service)
+
+        for distribution in distribution_list:
+
+            distribution["Tags"] = cloudfront.list_tags_for_resource(Resource=distribution["ARN"]).get("Tags").get("Items")
+            inventory.append(distribution)
+
+    return inventory
 
 
 #  ------------------------------------------------------------------------
@@ -215,17 +229,22 @@ def get_elb_inventory(oId, profile, boto3_config, selected_regions):
 
     """
 
-    return glob.get_inventory(
+    service = "elb"
+    lb_list = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
         selected_regions = selected_regions,
-        aws_service = "elb",
+        aws_service = service,
         aws_region = "all",
         function_name = "describe_load_balancers",
         key_get = "LoadBalancerDescriptions",
         pagination = True
     )
+
+    return _retrieve_lb_tags(oId, profile, service, lb_list)
+
+
 
 #  ------------------------------------------------------------------------
 #
@@ -249,19 +268,54 @@ def get_elbv2_inventory(oId, profile, boto3_config, selected_regions):
         ..note:: http://boto3.readthedocs.io/en/latest/reference/services/elbv2.html
 
     """
-    
-    return glob.get_inventory(
+    service = "elbv2"
+    lb_list = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
         selected_regions = selected_regions,
-        aws_service = "elbv2", 
+        aws_service = service, 
         aws_region = "all", 
         function_name = "describe_load_balancers", 
         key_get = "LoadBalancers",
         pagination = True
     )
 
+    return _retrieve_lb_tags(oId, profile, service, lb_list)
+
+
+def _retrieve_lb_tags(oId, profile, service, lb_list):
+    inventory = []
+    if len(lb_list) > 0:
+        
+        lbs_by_region = utils.resources_by_region(lb_list)
+
+        for region, lbs in lbs_by_region.items():
+
+            if service == "elb":
+                join_key = "LoadBalancerName"
+                tag_key = join_key
+                tag_param = "LoadBalancerNames"
+            elif service == "elbv2":
+                join_key = "LoadBalancerArn"
+                tag_key = "ResourceArn"
+                tag_param = "ResourceArns"
+                
+            session = utils.get_boto_session(oId, profile)
+            lb_client = session.client(service, region_name=region)
+            region_tags = []
+            for chunk in utils.chunks_list([lb[join_key] for lb in lbs], 20):
+                resp = lb_client.describe_tags(**{tag_param: chunk})
+                region_tags.extend(resp.get('TagDescriptions'))
+
+            for lb_tags in region_tags:
+                for lb in lbs:
+                    if lb[join_key] == lb_tags[tag_key]:
+                        lb["Tags"] = lb_tags.get("Tags", [])
+            
+            inventory.extend(lbs)
+
+    return inventory
 #
 # Hey, doc: we're in a module!
 #

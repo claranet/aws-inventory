@@ -35,12 +35,15 @@ def get_es_inventory(oId, profile, boto3_config, selected_regions):
         ..note:: http://boto3.readthedocs.io/en/latest/reference/services/es.html
     """ 
     
-    return glob.get_inventory(
+    inventory = []
+    service = "es"
+
+    cluster_list = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
         selected_regions = selected_regions,
-        aws_service = "es", 
+        aws_service = service, 
         aws_region = "all", 
         function_name = "list_domain_names", 
         key_get = "DomainNames",
@@ -49,6 +52,22 @@ def get_es_inventory(oId, profile, boto3_config, selected_regions):
         detail_function = "describe_elasticsearch_domain",
         detail_get_key = "DomainStatus"
     )
+    
+    if len(cluster_list) > 0:
+
+        clusters_by_region = utils.resources_by_region(cluster_list)
+
+        for region, clusters in clusters_by_region.items():
+
+            session = utils.get_boto_session(oId, profile)
+            es = session.client(service, region_name=region)
+
+        for cluster in clusters:
+
+            cluster["TagList"] = es.list_tags(ARN=cluster["DomainStatus"]["ARN"]).get("TagList", [])
+            inventory.append(cluster)
+
+    return inventory
 
 
 #  ------------------------------------------------------------------------

@@ -202,20 +202,36 @@ def get_elasticache_inventory_clusters(oId, profile, boto3_config, selected_regi
         ..note:: http://boto3.readthedocs.io/en/latest/reference/services/elasticache.html
 
     """
+    inventory = []
+    service = "elasticache"
 
-    return glob.get_inventory(
+    cluster_list = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
         selected_regions = selected_regions,
-        aws_service = "elasticache", 
+        aws_service = service, 
         aws_region = "all", 
         function_name = "describe_cache_clusters", 
         key_get = "CacheClusters",
         pagination = True
     )
 
-    return elasticache_inventory
+    if len(cluster_list) > 0:
+
+        clusters_by_region = utils.resources_by_region(cluster_list)
+
+        for region, clusters in clusters_by_region.items():
+
+            session = utils.get_boto_session(oId, profile)
+            elasticache = session.client(service, region_name=region)
+
+        for cluster in clusters:
+
+            cluster["TagList"] = elasticache.list_tags_for_resource(ResourceName=cluster["ARN"]).get("TagList", [])
+            inventory.append(cluster)
+
+    return inventory
    
 
 #  ------------------------------------------------------------------------
