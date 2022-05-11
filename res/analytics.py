@@ -64,7 +64,7 @@ def get_es_inventory(oId, profile, boto3_config, selected_regions):
 
         for cluster in clusters:
 
-            cluster["TagList"] = es.list_tags(ARN=cluster["DomainStatus"]["ARN"]).get("TagList")
+            cluster["TagList"] = es.list_tags(ARN=cluster["DomainStatus"]["ARN"]).get("TagList", [])
             inventory.append(cluster)
 
     return inventory

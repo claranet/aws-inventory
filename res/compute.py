@@ -474,7 +474,7 @@ def get_lambda_inventory(oId, profile, boto3_config, selected_regions):
 
         for function in functions:
 
-            function["Tags"] = client.list_tags(Resource=function["FunctionArn"]).get("Tags")
+            function["Tags"] = client.list_tags(Resource=function["FunctionArn"]).get("Tags", {})
             inventory.append(function)
 
     return inventory

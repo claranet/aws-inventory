@@ -311,7 +311,7 @@ def _retrieve_lb_tags(oId, profile, service, lb_list):
             for lb_tags in region_tags:
                 for lb in lbs:
                     if lb[join_key] == lb_tags[tag_key]:
-                        lb["Tags"] = lb_tags.get("Tags")
+                        lb["Tags"] = lb_tags.get("Tags", [])
             
             inventory.extend(lbs)
 

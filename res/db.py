@@ -228,7 +228,7 @@ def get_elasticache_inventory_clusters(oId, profile, boto3_config, selected_regi
 
         for cluster in clusters:
 
-            cluster["TagList"] = elasticache.list_tags_for_resource(ResourceName=cluster["ARN"]).get("TagList")
+            cluster["TagList"] = elasticache.list_tags_for_resource(ResourceName=cluster["ARN"]).get("TagList", [])
             inventory.append(cluster)
 
     return inventory

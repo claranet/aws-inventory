@@ -71,10 +71,11 @@ def get_s3_inventory(oId, profile, boto3_config, selected_regions):
 
             # Tags
             try:
-                bucket['Tags'] = s3.get_bucket_tagging(Bucket = bucket_name).get('TagSet')
+                bucket['Tags'] = s3.get_bucket_tagging(Bucket = bucket_name).get('TagSet', [])
             except ClientError as e:
                 if e.response['Error']['Code'] == 'AccessDenied':
                     config.logger.warning("S3 AccessDenied for get_bucket_tagging on {} for {}".format(bucket_name, oId))
+                    bucket['Tags'] = []
                     pass
 
             # ACL
@@ -217,7 +218,7 @@ def get_glacier_inventory(oId, profile, boto3_config, selected_regions):
 
         for vault in vaults:
 
-            vault["Tags"] = glacier.list_tags_for_vault(vaultName=vault["VaultName"]).get("Tags")
+            vault["Tags"] = glacier.list_tags_for_vault(vaultName=vault["VaultName"]).get("Tags", {})
             inventory.append(vault)
 
     return inventory

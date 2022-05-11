@@ -67,7 +67,7 @@ def get_sqs_inventory(oId, profile, boto3_config, selected_regions):
 
         for queue in queues:
 
-            queue["Tags"] = sqs.list_queue_tags(QueueUrl=queue["QueueUrl"]).get("Tags")
+            queue["Tags"] = sqs.list_queue_tags(QueueUrl=queue["QueueUrl"]).get("Tags", {})
             inventory.append(queue)
 
     return inventory
