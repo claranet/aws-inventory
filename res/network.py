@@ -285,34 +285,37 @@ def get_elbv2_inventory(oId, profile, boto3_config, selected_regions):
 
 
 def _retrieve_lb_tags(oId, profile, service, lb_list):
+    inventory = []
     if len(lb_list) > 0:
         
         lbs_by_region = utils.resources_by_region(lb_list)
 
         for region, lbs in lbs_by_region.items():
 
-            session = utils.get_boto_session(oId, profile)
-            lb_client = session.client(service, region_name=region)
             if service == "elb":
                 join_key = "LoadBalancerName"
                 tag_key = join_key
-                resp = lb_client.describe_tags(LoadBalancerNames=[lb[join_key] for lb in lbs])
+                tag_param = "LoadBalancerNames"
             elif service == "elbv2":
                 join_key = "LoadBalancerArn"
                 tag_key = "ResourceArn"
-                resp = lb_client.describe_tags(ResourceArns=[lb[join_key] for lb in lbs])
-            else:
-                break
+                tag_param = "ResourceArns"
+                
+            session = utils.get_boto_session(oId, profile)
+            lb_client = session.client(service, region_name=region)
+            region_tags = []
+            for chunk in utils.chunks_list([lb[join_key] for lb in lbs], 20):
+                resp = lb_client.describe_tags(**{tag_param: chunk})
+                region_tags.extend(resp.get('TagDescriptions'))
 
-            region_tags = resp.get('TagDescriptions')
             for lb_tags in region_tags:
                 for lb in lbs:
                     if lb[join_key] == lb_tags[tag_key]:
                         lb["Tags"] = lb_tags.get("Tags")
             
-            lb_list.extend(lbs)
+            inventory.extend(lbs)
 
-    return lb_list
+    return inventory
 #
 # Hey, doc: we're in a module!
 #
