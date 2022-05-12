@@ -225,6 +225,63 @@ def get_emr_inventory(oId, profile, boto3_config, selected_regions):
 
     return emr_inventory
 
+
+#  ------------------------------------------------------------------------
+#
+#    Kinesis
+#
+#  ------------------------------------------------------------------------
+
+def get_kinesis_inventory(oId, profile, boto3_config, selected_regions):
+
+    """
+        Returns kinesis inventory
+
+        :param oId: ownerId (AWS account)
+        :type oId: string
+        :param profile: configuration profile name used for session
+        :type profile: string
+
+        :return: kinesis inventory
+        :rtype: json
+
+        .. note:: http://boto3.readthedocs.io/en/latest/reference/services/kinesis.html
+    """
+
+    inventory = []
+    service = "kinesis"
+    stream_list = glob.get_inventory(
+        ownerId = oId,
+        profile = profile,
+        boto3_config = boto3_config,
+        selected_regions = selected_regions,
+        aws_service = service, 
+        aws_region = "all", 
+        function_name = "list_streams", 
+        key_get = "StreamNames",
+        detail_function = "describe_stream", 
+        join_key = "", 
+        detail_join_key = "StreamName", 
+        detail_get_key = "StreamDescription"
+    )
+
+    if len(stream_list) > 0:
+
+        streams_by_region = utils.resources_by_region(stream_list)
+
+        for region, streams in streams_by_region.items():
+
+            session = utils.get_boto_session(oId, profile)
+            kinesis = session.client(service, region_name=region)
+
+        for stream in streams:
+
+            stream["Tags"] = kinesis.list_tags_for_stream(StreamName=stream["StreamDescription"]["StreamName"]).get("Tags", [])
+            inventory.append(stream)
+
+    return inventory
+
+
 #
 # Hey, doc: we're in a module!
 #
