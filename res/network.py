@@ -205,6 +205,35 @@ def get_route53_inventory(oId, profile, boto3_config, selected_regions):
     return inventory
 
 
+def get_route53_inventory_zones(oId, profile, boto3_config, selected_regions):
+
+    """
+        Returns route 53 inventory (zones only without details).
+
+        :param oId: ownerId (AWS account)
+        :type oId: string
+        :param profile: configuration profile name used for session
+        :type profile: string
+
+        :return: route 53 inventory
+        :rtype: json
+
+        ..note:: http://boto3.readthedocs.io/en/latest/reference/services/route53.html
+
+    """
+    
+    return glob.get_inventory(
+        ownerId = oId,
+        profile = profile,
+        boto3_config = boto3_config,
+        selected_regions = selected_regions,
+        aws_service = "route53", 
+        aws_region = "global", 
+        function_name = "list_hosted_zones", 
+        key_get = "HostedZones",
+        pagination = True
+    )
+
 
 #  ------------------------------------------------------------------------
 #

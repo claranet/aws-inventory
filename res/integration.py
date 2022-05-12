@@ -205,7 +205,7 @@ def get_sns_inventory_topics(oId, profile, boto3_config, selected_regions):
             sns = session.client(service, region_name=region)
 
             for topic in topics:
-                print(topic)
+
                 topic["Tags"] = sns.list_tags_for_resource(ResourceArn=topic["TopicArn"]).get("Tags", [])
                 inventory.append(topic)
 
