@@ -241,16 +241,19 @@ def get_route53_inventory_zones(oId, profile, boto3_config, selected_regions):
         session = utils.get_boto_session(oId, profile)
         route53 = session.client(service)
 
+        for zone in inventory:
+            zone["Id"] = zone["Id"].split("/")[2]
+
         for chunk in utils.chunks_list(inventory, 10):
 
             chunk_tags = route53.list_tags_for_resources(
                 ResourceType="hostedzone",
-                ResourceIds=[z["Id"].split("/")[2] for z in chunk]
+                ResourceIds=[z["Id"] for z in chunk]
             )["ResourceTagSets"]
 
             for zone_tags in chunk_tags:
                 for zone in inventory:
-                    if zone["Id"].split("/")[2] == zone_tags["ResourceId"]:
+                    if zone["Id"] == zone_tags["ResourceId"]:
                         zone["Tags"] = zone_tags["Tags"]
 
     return inventory
