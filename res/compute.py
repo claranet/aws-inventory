@@ -472,10 +472,10 @@ def get_lambda_inventory(oId, profile, boto3_config, selected_regions):
             session = utils.get_boto_session(oId, profile)
             client = session.client(service, region_name=region)
 
-        for function in functions:
+            for function in functions:
 
-            function["Tags"] = client.list_tags(Resource=function["FunctionArn"]).get("Tags", {})
-            inventory.append(function)
+                function["Tags"] = client.list_tags(Resource=function["FunctionArn"]).get("Tags", {})
+                inventory.append(function)
 
     return inventory
 
