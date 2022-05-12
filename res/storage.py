@@ -216,10 +216,10 @@ def get_glacier_inventory(oId, profile, boto3_config, selected_regions):
             session = utils.get_boto_session(oId, profile)
             glacier = session.client(service, region_name=region)
 
-        for vault in vaults:
+            for vault in vaults:
 
-            vault["Tags"] = glacier.list_tags_for_vault(vaultName=vault["VaultName"]).get("Tags", {})
-            inventory.append(vault)
+                vault["Tags"] = glacier.list_tags_for_vault(vaultName=vault["VaultName"]).get("Tags", {})
+                inventory.append(vault)
 
     return inventory
 

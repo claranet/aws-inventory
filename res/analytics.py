@@ -62,10 +62,10 @@ def get_es_inventory(oId, profile, boto3_config, selected_regions):
             session = utils.get_boto_session(oId, profile)
             es = session.client(service, region_name=region)
 
-        for cluster in clusters:
+            for cluster in clusters:
 
-            cluster["TagList"] = es.list_tags(ARN=cluster["DomainStatus"]["ARN"]).get("TagList", [])
-            inventory.append(cluster)
+                cluster["TagList"] = es.list_tags(ARN=cluster["DomainStatus"]["ARN"]).get("TagList", [])
+                inventory.append(cluster)
 
     return inventory
 
@@ -274,10 +274,10 @@ def get_kinesis_inventory(oId, profile, boto3_config, selected_regions):
             session = utils.get_boto_session(oId, profile)
             kinesis = session.client(service, region_name=region)
 
-        for stream in streams:
+            for stream in streams:
 
-            stream["Tags"] = kinesis.list_tags_for_stream(StreamName=stream["StreamDescription"]["StreamName"]).get("Tags", [])
-            inventory.append(stream)
+                stream["Tags"] = kinesis.list_tags_for_stream(StreamName=stream["StreamDescription"]["StreamName"]).get("Tags", [])
+                inventory.append(stream)
 
     return inventory
 

@@ -116,10 +116,10 @@ def get_dynamodb_inventory(oId, profile, boto3_config, selected_regions):
             session = utils.get_boto_session(oId, profile)
             dynamodb = session.client(service, region_name=region)
 
-        for table in tables:
+            for table in tables:
 
-            table["Tags"] = dynamodb.list_tags_of_resource(ResourceArn=table["Table"]["TableArn"]).get("Tags", [])
-            inventory.append(table)
+                table["Tags"] = dynamodb.list_tags_of_resource(ResourceArn=table["Table"]["TableArn"]).get("Tags", [])
+                inventory.append(table)
 
     return inventory
 
@@ -245,10 +245,10 @@ def get_elasticache_inventory_clusters(oId, profile, boto3_config, selected_regi
             session = utils.get_boto_session(oId, profile)
             elasticache = session.client(service, region_name=region)
 
-        for cluster in clusters:
+            for cluster in clusters:
 
-            cluster["TagList"] = elasticache.list_tags_for_resource(ResourceName=cluster["ARN"]).get("TagList", [])
-            inventory.append(cluster)
+                cluster["TagList"] = elasticache.list_tags_for_resource(ResourceName=cluster["ARN"]).get("TagList", [])
+                inventory.append(cluster)
 
     return inventory
    

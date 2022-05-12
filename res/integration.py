@@ -65,10 +65,10 @@ def get_sqs_inventory(oId, profile, boto3_config, selected_regions):
             session = utils.get_boto_session(oId, profile)
             sqs = session.client(service, region_name=region)
 
-        for queue in queues:
+            for queue in queues:
 
-            queue["Tags"] = sqs.list_queue_tags(QueueUrl=queue["QueueUrl"]).get("Tags", {})
-            inventory.append(queue)
+                queue["Tags"] = sqs.list_queue_tags(QueueUrl=queue["QueueUrl"]).get("Tags", {})
+                inventory.append(queue)
 
     return inventory
 
@@ -204,10 +204,10 @@ def get_sns_inventory_topics(oId, profile, boto3_config, selected_regions):
             session = utils.get_boto_session(oId, profile)
             sns = session.client(service, region_name=region)
 
-        for topic in topics:
-
-            topic["Tags"] = sns.list_tags_for_resource(ResourceArn=topic["TopicArn"]).get("Tags", [])
-            inventory.append(topic)
+            for topic in topics:
+                print(topic)
+                topic["Tags"] = sns.list_tags_for_resource(ResourceArn=topic["TopicArn"]).get("Tags", [])
+                inventory.append(topic)
 
     return inventory
     
