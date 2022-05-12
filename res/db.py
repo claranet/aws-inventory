@@ -107,7 +107,6 @@ def get_dynamodb_inventory(oId, profile, boto3_config, selected_regions):
         pagination = True
     )
 
-
     if len(table_list) > 0:
 
         tables_by_region = utils.resources_by_region(table_list)
@@ -119,7 +118,6 @@ def get_dynamodb_inventory(oId, profile, boto3_config, selected_regions):
 
         for table in tables:
 
-            print(table)
             table["Tags"] = dynamodb.list_tags_of_resource(ResourceArn=table["Table"]["TableArn"]).get("Tags", [])
             inventory.append(table)
 

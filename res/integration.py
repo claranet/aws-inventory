@@ -148,18 +148,8 @@ def get_sns_inventory(oId, profile, boto3_config, selected_regions):
     """ 
 
     sns_inventory = {}
-    
-    sns_inventory['topics'] = glob.get_inventory(
-        ownerId = oId,
-        profile = profile,
-        boto3_config = boto3_config,
-        selected_regions = selected_regions,
-        aws_service = "sns", 
-        aws_region = "all", 
-        function_name = "list_topics", 
-        key_get = "Topics",
-        pagination = True
-    )
+
+    sns_inventory['topics'] = get_sns_inventory_topics(oId, profile, boto3_config, selected_regions)
 
     sns_inventory['applications'] = glob.get_inventory(
         ownerId = oId,
@@ -173,6 +163,53 @@ def get_sns_inventory(oId, profile, boto3_config, selected_regions):
         pagination = True
     )
 
+
+def get_sns_inventory_topics(oId, profile, boto3_config, selected_regions):
+
+    """
+        Returns sns (topics only)
+
+        :param oId: ownerId (AWS account)
+        :type oId: string
+        :param profile: configuration profile name used for session
+        :type profile: string
+
+        :return: Amazon sns inventory
+        :rtype: json
+
+        ..note:: http://boto3.readthedocs.io/en/latest/reference/services/sns.html
+    """ 
+
+    inventory = []
+    service = "sns"
+
+    topic_list = glob.get_inventory(
+        ownerId = oId,
+        profile = profile,
+        boto3_config = boto3_config,
+        selected_regions = selected_regions,
+        aws_service = service, 
+        aws_region = "all", 
+        function_name = "list_topics", 
+        key_get = "Topics",
+        pagination = True
+    )
+
+    if len(topic_list) > 0:
+
+        topics_by_region = utils.resources_by_region(topic_list)
+
+        for region, topics in topics_by_region.items():
+
+            session = utils.get_boto_session(oId, profile)
+            sns = session.client(service, region_name=region)
+
+        for topic in topics:
+
+            topic["Tags"] = sns.list_tags_for_resource(ResourceArn=topic["TopicArn"]).get("Tags", [])
+            inventory.append(topic)
+
+    return inventory
     
 #  ------------------------------------------------------------------------
 #
