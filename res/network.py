@@ -221,18 +221,37 @@ def get_route53_inventory_zones(oId, profile, boto3_config, selected_regions):
         ..note:: http://boto3.readthedocs.io/en/latest/reference/services/route53.html
 
     """
+
+    inventory = []
+    service = "route53"
     
-    return glob.get_inventory(
+    zone_list = glob.get_inventory(
         ownerId = oId,
         profile = profile,
         boto3_config = boto3_config,
         selected_regions = selected_regions,
-        aws_service = "route53", 
+        aws_service = service, 
         aws_region = "global", 
         function_name = "list_hosted_zones", 
         key_get = "HostedZones",
         pagination = True
     )
+
+    if len(zone_list) > 0:
+
+        session = utils.get_boto_session(oId, profile)
+        route53 = session.client(service)
+
+        for zone in zone_list:
+            print(zone)
+
+            zone["Tags"] = route53.list_tags_for_resource(
+                ResourceType="hostedzone",
+                ResourceId=zone["Id"].split("/")[2]
+            ).get("ResourceTagSet").get("Tags", [])
+            inventory.append(zone)
+
+    return inventory
 
 
 #  ------------------------------------------------------------------------
