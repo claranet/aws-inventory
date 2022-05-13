@@ -205,6 +205,59 @@ def get_route53_inventory(oId, profile, boto3_config, selected_regions):
     return inventory
 
 
+def get_route53_inventory_zones(oId, profile, boto3_config, selected_regions):
+
+    """
+        Returns route 53 inventory (zones only without details).
+
+        :param oId: ownerId (AWS account)
+        :type oId: string
+        :param profile: configuration profile name used for session
+        :type profile: string
+
+        :return: route 53 inventory
+        :rtype: json
+
+        ..note:: http://boto3.readthedocs.io/en/latest/reference/services/route53.html
+
+    """
+
+    service = "route53"
+    
+    inventory = glob.get_inventory(
+        ownerId = oId,
+        profile = profile,
+        boto3_config = boto3_config,
+        selected_regions = selected_regions,
+        aws_service = service, 
+        aws_region = "global", 
+        function_name = "list_hosted_zones", 
+        key_get = "HostedZones",
+        pagination = True
+    )
+
+    if len(inventory) > 0:
+
+        session = utils.get_boto_session(oId, profile)
+        route53 = session.client(service)
+
+        for zone in inventory:
+            zone["Id"] = zone["Id"].split("/")[2]
+
+        for chunk in utils.chunks_list(inventory, 10):
+
+            chunk_tags = route53.list_tags_for_resources(
+                ResourceType="hostedzone",
+                ResourceIds=[z["Id"] for z in chunk]
+            )["ResourceTagSets"]
+
+            for zone_tags in chunk_tags:
+                for zone in inventory:
+                    if zone["Id"] == zone_tags["ResourceId"]:
+                        zone["Tags"] = zone_tags["Tags"]
+
+    return inventory
+
 
 #  ------------------------------------------------------------------------
 #
