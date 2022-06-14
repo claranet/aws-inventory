@@ -241,7 +241,7 @@ def get_inventory_detail(client,
 
     if (detail_function != ""):
 
-        config.logger.info('{} detail function'.format(detail_function))
+        config.logger.debug("{} detail function".format(detail_function))
 
         # we set the key value; it's something that identifies the objet and that we pass to 
         # the detail function as a search key. Sometimes the upper inventory functions returns 
