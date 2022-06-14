@@ -95,13 +95,12 @@ def get_inventory(ownerId,
             region_name = region['RegionName']
             utils.progress(region_name)
             utils.display(ownerId, region_name, aws_service, function_name)
-            config.logger.info('Account {}, {} inventory for region {}'.format(ownerId, aws_service, region_name))
 
-            if (region_name in svc_list):
-
+            if region_name in svc_list:
                 # Here the region should be supported. Let's see if it's in a selected regions (in cmd line argument)
             
                 if (region_name in selected_regions) or (len(selected_regions) == 0):
+                    config.logger.info("Processing region {}".format(region_name))
 
                     t_try = datetime.datetime.now()
 
