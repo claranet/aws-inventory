@@ -85,10 +85,18 @@ def get_inventory(ownerId,
         svc_list = session.get_available_regions(aws_service)
 
         # Bug AWS: get_available_regions("timestream-write") returns an empty array, though it's not a global service :(
-        if (aws_service == "timestream-write"):
-            svc_list = ['us-east-1', 'us-east-2', 'us-west-2', 'eu-central-1', 'eu-west-1']
-            
-        config.logger.info("Supported regions for service {}: {}".format(aws_service, svc_list))
+        if aws_service == "timestream-write":
+            svc_list = [
+                "us-east-1",
+                "us-east-2",
+                "us-west-2",
+                "eu-central-1",
+                "eu-west-1",
+            ]
+
+        config.logger.debug(
+            "Supported regions for service {}: {}".format(aws_service, svc_list)
+        )
 
         for region in config.regions:
 
@@ -100,7 +108,7 @@ def get_inventory(ownerId,
                 # Here the region should be supported. Let's see if it's in a selected regions (in cmd line argument)
             
                 if (region_name in selected_regions) or (len(selected_regions) == 0):
-                    config.logger.info("Processing region {}".format(region_name))
+                    config.logger.debug("Processing region {}".format(region_name))
 
                     t_try = datetime.datetime.now()
 
