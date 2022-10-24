@@ -243,24 +243,23 @@ def get_elasticache_inventory_clusters(oId, profile, boto3_config, selected_regi
         for region, clusters in clusters_by_region.items():
 
             session = utils.get_boto_session(oId, profile)
-            elasticache = session.client(service, region_name=region)
 
+            resourcegroupstaggingapi = session.client(
+                "resourcegroupstaggingapi", region_name=region
+            )
             for cluster in clusters:
-                try:
-                    # If the cluster is not in the available state, ListTagsForResource returns an error, see
-                    # https://docs.aws.amazon.com/AmazonElastiCache/latest/APIReference/API_ListTagsForResource.html
-                    cluster["TagList"] = elasticache.list_tags_for_resource(
-                        ResourceName=cluster["ARN"]
-                    ).get("TagList", [])
-                except botocore.errorfactory.CacheClusterNotFoundFault as e:
-                    config.logger.warning(
-                        "Failed to list tags for ElastiCache cluster {} in region {}.".format(
-                            cluster["ARN"], region
-                        ),
-                        e,
+                response = resourcegroupstaggingapi.get_resources(
+                    ResourceARNList=[cluster["ARN"]]
+                )
+                resource_tag_mapping_list = response["ResourceTagMappingList"]
+                if len(resource_tag_mapping_list) > 1:
+                    config.logger.warn(
+                        "More than one resource was return by AWS API, taking first into account"
                     )
-                finally:
-                    inventory.append(cluster)
+                if len(resource_tag_mapping_list) > 0:
+                    cluster["TagList"] = resource_tag_mapping_list[0].get("Tags", [])
+
+                inventory.append(cluster)
 
     return inventory
    
