@@ -65,8 +65,12 @@ def display(ownerId, function, region_name, function_name):
         Formatting display output, with progression (in %)
     """
 
-    progression = (config.nb_units_done / config.nb_units_todo * 100)
-    print(config.display.format(ownerId, progression, function, region_name, function_name, " "*20), end="\r", flush=True)
+    progression = config.nb_units_done / config.nb_units_todo * 100
+    config.logger.debug(
+        config.display.format(
+            ownerId, progression, function, region_name, function_name, " " * 20
+        ),
+    )
     return
 
 def progress(region_name):
@@ -150,7 +154,7 @@ def check_arguments(arguments):
     try:
         session = boto3.Session(profile_name=profile)
     except ProfileNotFound as e:
-        print("Profile name [" + profile + "] not found, please check.")
+        config.logger.error("Profile name [" + profile + "] not found, please check.")
         exit(1)
 
     # 
@@ -172,8 +176,10 @@ def check_arguments(arguments):
 
     for arg in args.services:
         str_service = str(arg).lower()
-        if (str_service not in config.SUPPORTED_COMMANDS) and (str_service not in config.SUPPORTED_PARAMETERS):
-            print('Unknown argument [' + arg + ']')
+        if (str_service not in config.SUPPORTED_COMMANDS) and (
+            str_service not in config.SUPPORTED_PARAMETERS
+        ):
+            config.logger.error("Unknown argument [" + arg + "]")
             exit(1)
         else:
             services.append(str_service)
@@ -194,8 +200,8 @@ def check_arguments(arguments):
 
     for arg in args.regions:
         region_name = str(arg).lower()
-        if (region_name not in known_regions_list):
-            print('Unknown region [' + region_name + ']')
+        if region_name not in known_regions_list:
+            config.logger.error("Unknown region [" + region_name + "]")
             exit(1)
         else:
             selected_regions.append(region_name)

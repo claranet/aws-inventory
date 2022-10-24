@@ -85,23 +85,30 @@ def get_inventory(ownerId,
         svc_list = session.get_available_regions(aws_service)
 
         # Bug AWS: get_available_regions("timestream-write") returns an empty array, though it's not a global service :(
-        if (aws_service == "timestream-write"):
-            svc_list = ['us-east-1', 'us-east-2', 'us-west-2', 'eu-central-1', 'eu-west-1']
-            
-        config.logger.info("Supported regions for service {}: {}".format(aws_service, svc_list))
+        if aws_service == "timestream-write":
+            svc_list = [
+                "us-east-1",
+                "us-east-2",
+                "us-west-2",
+                "eu-central-1",
+                "eu-west-1",
+            ]
+
+        config.logger.debug(
+            "Supported regions for service {}: {}".format(aws_service, svc_list)
+        )
 
         for region in config.regions:
 
             region_name = region['RegionName']
             utils.progress(region_name)
             utils.display(ownerId, region_name, aws_service, function_name)
-            config.logger.info('Account {}, {} inventory for region {}'.format(ownerId, aws_service, region_name))
 
-            if (region_name in svc_list):
-
+            if region_name in svc_list:
                 # Here the region should be supported. Let's see if it's in a selected regions (in cmd line argument)
             
                 if (region_name in selected_regions) or (len(selected_regions) == 0):
+                    config.logger.debug("Processing region {}".format(region_name))
 
                     t_try = datetime.datetime.now()
 
@@ -242,7 +249,7 @@ def get_inventory_detail(client,
 
     if (detail_function != ""):
 
-        config.logger.info('{} detail function'.format(detail_function))
+        config.logger.debug("{} detail function".format(detail_function))
 
         # we set the key value; it's something that identifies the objet and that we pass to 
         # the detail function as a search key. Sometimes the upper inventory functions returns 
