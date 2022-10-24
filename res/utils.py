@@ -37,7 +37,7 @@ def get_aws_regions(profile_name):
     session = boto3.Session(profile_name=profile_name, region_name="us-east-1")
     client = session.client("ec2")
 
-    regions = client.describe_regions(AllRegions=True)
+    regions = client.describe_regions(AllRegions=False)
     region_list = regions["Regions"]
 
     # We assign one color to each region
