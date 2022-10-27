@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws-inventory"
-version = "1.0.2"
+version = "1.0.3a4"
 description = "Python script for AWS resources inventory (cheaper than AWS Config)"
 authors = ["Janiko <janiko@geba.fr>"]
 license = "GPL-3.0"
