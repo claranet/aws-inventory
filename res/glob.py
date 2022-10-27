@@ -145,10 +145,12 @@ def get_inventory(ownerId,
                         # unsupported region for efs
                         config.logger.warning("{} is not available (not supported ?) in region {}.".format(aws_service, region_name))
                         config.logger.debug("aws service:{}, region:{}, function:{}, error type: {}, error text: {}".format(aws_service, region_name, function_name, type(e), e))
+                        raise
 
                     except Exception as e:
 
                         config.logger.error("Error while processing {}, {}, {}. Error: {}".format(aws_service, region_name, function_name, e))
+                        raise
 
                     finally:
 
