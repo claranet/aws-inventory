@@ -135,20 +135,23 @@ def get_inventory(ownerId,
                             inv_list = client.__getattribute__(function_name)(**additional_parameters).get(key_get)
                             utils.display(ownerId, region_name, aws_service, function_name)
 
-                            for inventory_object in inv_list:
+                            if inv_list:
+                                for inventory_object in inv_list:
 
-                                detailed_inv = get_inventory_detail(client, region_name, inventory_object, detail_function, join_key, detail_join_key, detail_get_key, pagination_detail, detail_additional_parameters)
-                                inventory.append(json.loads(utils.json_datetime_converter(detailed_inv)))
+                                    detailed_inv = get_inventory_detail(client, region_name, inventory_object, detail_function, join_key, detail_join_key, detail_get_key, pagination_detail, detail_additional_parameters)
+                                    inventory.append(json.loads(utils.json_datetime_converter(detailed_inv)))
 
                     except (botocore.exceptions.EndpointConnectionError, botocore.exceptions.ClientError) as e:
 
                         # unsupported region for efs
                         config.logger.warning("{} is not available (not supported ?) in region {}.".format(aws_service, region_name))
                         config.logger.debug("aws service:{}, region:{}, function:{}, error type: {}, error text: {}".format(aws_service, region_name, function_name, type(e), e))
+                        raise
 
                     except Exception as e:
 
                         config.logger.error("Error while processing {}, {}, {}. Error: {}".format(aws_service, region_name, function_name, e))
+                        raise
 
                     finally:
 
@@ -191,10 +194,10 @@ def get_inventory(ownerId,
                         detail = detail.get('DistributionList')
                     
                     # Anything in the detail item?
-
-                    for inventory_object in detail.get(key_get):
-                        detailed_inv = get_inventory_detail(client, aws_region, inventory_object, detail_function, join_key, detail_join_key, detail_get_key, pagination_detail, detail_additional_parameters)
-                        inventory.append(json.loads(utils.json_datetime_converter(detailed_inv)))
+                    if detail.get(key_get):
+                        for inventory_object in detail.get(key_get):
+                            detailed_inv = get_inventory_detail(client, aws_region, inventory_object, detail_function, join_key, detail_join_key, detail_get_key, pagination_detail, detail_additional_parameters)
+                            inventory.append(json.loads(utils.json_datetime_converter(detailed_inv)))
 
             else:
 
